@@ -24,7 +24,7 @@ app.use(
 
 
 /* ✅ ROUTES */
-app.use("/api/v1/auth", require("./models/auth/AuthRoutes"));
+app.use("/api/v1/auth", require("./"));
 app.use("/api/v1/user", require("./models/user/UserRoutes"));
 app.use("/api/v1/admin", require("./models/admin/AdminRoutes"));
 
