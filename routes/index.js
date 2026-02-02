@@ -24,9 +24,9 @@ app.use(
 
 
 /* ✅ ROUTES */
-app.use("/api/v1/auth", require("./models/auth/AuthRoutes"));
-app.use("/api/v1/user", require("./models/user/UserRoutes"));
-app.use("/api/v1/admin", require("./models/admin/AdminRoutes"));
+app.use("/api/v1/auth", require(".models/auth/router/index"));
+app.use("/api/v1/user", require("./models/user/rotes/UserRoutes"));
+app.use("/api/v1/admin", require("./models/admin/routes/AdminRoutes"));
 
 app.get("/", (req, res) => {
   res.send("API running...");

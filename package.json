@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "nodemon server.js"
+  },
   "dependencies": {
     "bscript": "^0.1.0",
     "cookie-parser": "^1.4.7",
@@ -6,7 +9,9 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.16.2",
+    "mysql2": "^3.16.2"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.11"
   }
 }
