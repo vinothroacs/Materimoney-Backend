@@ -1,22 +1,16 @@
-const app = require("./routes/index");
-const pool = require("./config/db");
-require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
-const PORT = process.env.PORT || 5000;
+const app = express();
 
-const startServer = async () => {
-  try {
-    const conn = await pool.getConnection();
-    conn.release();
-    console.log("✅ MySQL DB connected");
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
+app.use(express.json());
+app.use(cookieParser());
 
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("❌ Server failed:", error);
-    process.exit(1);
-  }
-};
+app.use("/api/auth", require("./models/auth/routes/authRoutes"));
 
-startServer();
+app.listen(5000, () => console.log("Server running on port 5000"));
