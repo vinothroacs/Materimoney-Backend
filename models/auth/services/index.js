@@ -91,7 +91,7 @@ module.exports.register = async (props) => {
       name,
       email,
       phone,
-      password, // plain password (unchanged)
+      password, //// plain password (unchanged)
       roleid: 2,
       status: "ACTIVE",
     });
