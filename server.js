@@ -12,6 +12,5 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-app.use("/api/auth", require("./models/auth/routes/authRoutes"));
 
 app.listen(5000, () => console.log("Server running on port 5000"));
