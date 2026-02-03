@@ -10,6 +10,7 @@ module.exports.login = async (props) => {
   try {
     const user = await db("users")
       .where({ email })
+      .orWhere("phone", email)
       .first();
 
     if (!user) {
@@ -31,7 +32,7 @@ module.exports.login = async (props) => {
 
     const token = jwt.sign(
       {
-        userid: user.userid,
+        // userid: user.userid,
         name: user.name,
         email: user.email,
         roleid: user.roleid,
@@ -46,6 +47,8 @@ module.exports.login = async (props) => {
       status: true,
       message: "Login successful",
       response: token,
+       roleid: user.roleid,   // 🔥 frontend-ku thevai
+      // userid: user.userid,
     };
   } catch (error) {
     console.error("Auth Service Login Error:", error);
@@ -61,7 +64,17 @@ module.exports.login = async (props) => {
 module.exports.register = async (props) => {
   const { name, email, password,phone } = props;
 
-  try {
+    try {
+    // 🚫 Block admin registration
+    if (email === "admin@gmail.com") {
+      return {
+        code: 403,
+        status: false,
+        message: "Admin registration is not allowed",
+      };
+    }
+
+
     const existingUser = await db("users")
       .where({ email })
       .first();
@@ -85,7 +98,7 @@ module.exports.register = async (props) => {
 
     const token = jwt.sign(
       {
-        userid,
+        // userid,
         name,
         email,
         phone,
@@ -101,8 +114,8 @@ module.exports.register = async (props) => {
       status: true,
       message: "Registration successful",
       response: {
-        token,
-        userid,
+
+        // userid,
         roleid: 2,
       },
     };

@@ -1,12 +1,9 @@
-
-const service = require("../services/index")
-
+const service = require("../services/index");
 
 module.exports.register = async (req, res) => {
   try {
-     console.log("REQ BODY 👉", req.body)
+    console.log("REQ BODY 👉", req.body);
     const response = await service.register(req.body);
-    
 
     return res.status(response.code).json({
       status: response.status,
@@ -22,8 +19,6 @@ module.exports.register = async (req, res) => {
   }
 };
 
-
-
 module.exports.login = async (req, res) => {
   try {
     const response = await service.login(req.body);
@@ -32,6 +27,8 @@ module.exports.login = async (req, res) => {
       status: response.status,
       message: response.message,
       response: response.response,
+      roleid: response.roleid, // 👈 ADD
+      // userid: response.userid,
     });
   } catch (err) {
     console.error("Login controller error:", err);
