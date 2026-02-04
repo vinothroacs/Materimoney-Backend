@@ -2,11 +2,10 @@
 const service = require("../services");
 
 module.exports.submitProfile = async (req, res) => {
-   console.log("BODY 👉", req.body);
-  console.log("FILES 👉", req.files);
+ const userId = req.user.id;
 
   try {
-const response = await service.submitProfile(req.body, req.files);
+const response = await service.submitProfile(req.body, req.files,userId);
 
     if (!response.success) {
       return res.status(400).json({

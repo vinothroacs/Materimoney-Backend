@@ -47,7 +47,8 @@ module.exports.login = async (props) => {
       status: true,
       message: "Login successful",
       response: token,
-       roleid: user.roleid,   // 🔥 frontend-ku thevai
+       roleid: user.roleid, 
+        status:user.status                                 // 🔥 frontend-ku thevai
       // userid: user.userid,
     };
   } catch (error) {
@@ -93,7 +94,7 @@ module.exports.register = async (props) => {
       phone,
       password, //// plain password (unchanged)
       roleid: 2,
-      status: "ACTIVE",
+      status: "NEW",
     });
 
     const token = jwt.sign(

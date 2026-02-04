@@ -1,117 +1,186 @@
+
 // const db = require("../../../config/db");
+// function convertTo24Hour(time12h) {
+//   // null / undefined safety
+//   if (!time12h) return null;
 
-// exports.submitForm = async (user, f) => {
-//   await db.query(
-//     `INSERT INTO user_forms (
-//       user_id, full_name, gender, dob, birth_time, marital_status,
-//       education, occupation, income, email,
-//       father_name, mother_name, grandfather_name, grandmother_name, siblings,
-//       raasi, star, dosham, birth_place,
-//       horoscope_uploaded, horoscope_file_name, horoscope_file_url,
-//       religion, caste, address, city, country,
-//       privacy, photo, is_public
-//     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-//     [
-//       user.id,
-//       f.fullName,
-//       f.gender,
-//       f.dob,
-//       f.birthTime,
-//       f.maritalStatus,
-//       f.education,
-//       f.occupation,
-//       f.income,
-//       user.email,
-//       f.father,
-//       f.mother,
-//       f.grandfather,
-//       f.grandmother,
-//       f.siblings,
-//       f.raasi,
-//       f.star,
-//       f.dosham,
-//       f.birthPlace,
-//       f.horoscope ? 1 : 0,
-//       f.horoscope?.name || null,
-//       f.horoscope?.url || null,
-//       f.religion,
-//       f.caste,
-//       f.address,
-//       f.city,
-//       f.country,
-//       f.privacy,
-//       f.photo || null,
-//       f.privacy === "Public" ? 1 : 0,
-//     ]
-//   );
+//   // If already 24-hour format like "20:30"
+//   if (/^\d{2}:\d{2}$/.test(time12h)) {
+//     return time12h;
+//   }
 
-//   // 🔥 update user status
-//   await db.query(
-//     "UPDATE users SET status='PENDING' WHERE id=?",
-//     [user.id]
-//   );
+//   // Expecting "hh:mm AM" or "hh:mm PM"
+//   const parts = time12h.trim().split(" ");
+//   if (parts.length !== 2) return null;
+
+//   let [hours, minutes] = parts[0].split(":");
+//   const period = parts[1].toUpperCase();
+
+//   hours = parseInt(hours, 10);
+
+//   if (period === "PM" && hours !== 12) hours += 12;
+//   if (period === "AM" && hours === 12) hours = 0;
+
+//   return `${hours.toString().padStart(2, "0")}:${minutes}`;
+// }
+
+
+// module.exports.submitProfile = async (payload, files,userid) => {
+
+//   const insertData = {
+//     full_name: payload.fullName,
+//     gender: payload.gender,
+//     dob: payload.dob,
+//     birth_time: convertTo24Hour(payload.birthTime),
+
+
+//     marital_status: payload.maritalStatus,
+//     education: payload.education,
+//     occupation: payload.occupation,
+//     income: payload.income,
+
+//     email: payload.email,
+
+//     father_name: payload.father,
+//     mother_name: payload.mother,
+//     grandfather_name: payload.grandfather,
+//     grandmother_name: payload.grandmother,
+//     siblings: payload.siblings,
+
+//     raasi: payload.raasi,
+//     star: payload.star,
+//     dosham: payload.dosham,
+//     birth_place: payload.city,
+
+//     religion: payload.religion,
+//     caste: payload.caste,
+
+//     address: payload.address,
+//     city: payload.city,
+//     country: payload.country,
+//     privacy: payload.privacy,
+
+//     // ✅ JSON OR FILE — BOTH HANDLED
+//     horoscope_uploaded:
+//       files?.horoscope || payload.horoscope_uploaded ? 1 : 0,
+
+//     horoscope_file_name:
+//       files?.horoscope
+//         ? files.horoscope[0].originalname
+//         : payload.horoscope_file_name || null,
+
+//     horoscope_file_url:
+//       files?.horoscope
+//         ? `/uploads/horoscope/${files.horoscope[0].originalname}`
+//         : payload.horoscope_file_url || null,
+
+//     photo:
+//       files?.photo
+//         ? files.photo[0].originalname
+//         : payload.photo || null,
+
+//     is_public: payload.privacy === "Public" ? 1 : 0,
+//     created_at: new Date()
+//   };
+
+//   const [id] = await db("profiles").insert(insertData);
+//   return { success: true, data: { id } };
 // };
 
 
 const db = require("../../../config/db");
 
-module.exports.submitProfile = async (payload) => {
+function convertTo24Hour(time12h) {
+  if (!time12h) return null;
+  if (/^\d{2}:\d{2}$/.test(time12h)) return time12h;
+
+  const parts = time12h.trim().split(" ");
+  if (parts.length !== 2) return null;
+
+  let [hours, minutes] = parts[0].split(":");
+  const period = parts[1].toUpperCase();
+
+  hours = parseInt(hours, 10);
+  if (period === "PM" && hours !== 12) hours += 12;
+  if (period === "AM" && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+}
+
+module.exports.submitProfile = async (payload, files, userid) => {
   try {
-   const insertData = {
-  full_name: payload.fullName,
-  gender: payload.gender,
-  dob: payload.dob,
-  birth_time: payload.birthTime,
+    const insertData = {
+      full_name: payload.fullName,
+      gender: payload.gender,
+      dob: payload.dob,
+      birth_time: convertTo24Hour(payload.birthTime),
 
-  marital_status: payload.maritalStatus,
-  education: payload.education,
-  occupation: payload.occupation,
-  income: payload.income,
+      marital_status: payload.maritalStatus,
+      education: payload.education,
+      occupation: payload.occupation,
+      income: payload.income,
 
-  father_name: payload.father,
-  mother_name: payload.mother,
-  grandfather_name: payload.grandfather,
-  grandmother_name: payload.grandmother,
-  siblings: payload.siblings,
+      email: payload.email,
 
-  raasi: payload.raasi,
-  star: payload.star,
-  dosham: payload.dosham,
-  birth_place: payload.city,
+      father_name: payload.father,
+      mother_name: payload.mother,
+      grandfather_name: payload.grandfather,
+      grandmother_name: payload.grandmother,
+      siblings: payload.siblings,
 
-  religion: payload.religion,
-  caste: payload.caste,
+      raasi: payload.raasi,
+      star: payload.star,
+      dosham: payload.dosham,
+      birth_place: payload.city,
 
-  address: payload.address,
-  city: payload.city,
-  country: payload.country,
-  privacy: payload.privacy,
+      religion: payload.religion,
+      caste: payload.caste,
 
-  horoscope_uploaded: payload.horoscope ? 1 : 0,
-  horoscope_file_url: payload.horoscope
-    ? payload.horoscope.originalname
-    : null,
+      address: payload.address,
+      city: payload.city,
+      country: payload.country,
+      privacy: payload.privacy,
 
-  photo: payload.photo
-    ? payload.photo.originalname
-    : null,
+      horoscope_uploaded:
+        files?.horoscope || payload.horoscope_uploaded ? 1 : 0,
 
-  is_public: payload.privacy === "Public" ? 1 : 0,
-  created_at: new Date()
-};
+      horoscope_file_name:
+        files?.horoscope
+          ? files.horoscope[0].originalname
+          : payload.horoscope_file_name || null,
 
+      horoscope_file_url:
+        files?.horoscope
+          ? `/uploads/horoscope/${files.horoscope[0].originalname}`
+          : payload.horoscope_file_url || null,
 
-    const [id] = await db("profiles").insert(insertData);
+      photo:
+        files?.photo
+          ? files.photo[0].originalname
+          : payload.photo || null,
+
+      is_public: payload.privacy === "Public" ? 1 : 0,
+      created_at: new Date(),
+    };
+
+    // 1️⃣ Insert profile
+    const [profileId] = await db("profiles").insert(insertData);
+
+    // 2️⃣ 🔥 UPDATE USER STATUS → PENDING
+    await db("users")
+      .where({ id: userid })
+      .update({ status: "PENDING" });
 
     return {
       success: true,
-      message: "Profile submitted successfully",
-      data: { id }
+      message: "Profile submitted. Waiting for admin approval",
+      data: { profileId },
     };
   } catch (error) {
+    console.error("Submit Profile Error:", error);
     return {
       success: false,
-      message: error.message
+      message: error.message,
     };
   }
 };
