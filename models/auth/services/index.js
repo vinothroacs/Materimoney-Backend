@@ -32,7 +32,7 @@ module.exports.login = async (props) => {
 
     const token = jwt.sign(
       {
-        // userid: user.userid,
+        userid: user.id,
         name: user.name,
         email: user.email,
         roleid: user.roleid,
@@ -99,7 +99,7 @@ module.exports.register = async (props) => {
 
     const token = jwt.sign(
       {
-        // userid,
+        userid,
         name,
         email,
         phone,
@@ -114,11 +114,8 @@ module.exports.register = async (props) => {
       code: 201,
       status: true,
       message: "Registration successful",
-      response: {
-
-        // userid,
-        roleid: 2,
-      },
+      response: token,
+      roleid:2,
     };
   } catch (error) {
     console.error("Auth Service Register Error:", error);

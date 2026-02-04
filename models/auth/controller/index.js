@@ -1,6 +1,8 @@
 const service = require("../services/index");
 
 module.exports.register = async (req, res) => {
+  console.log("SIGN SECRET:", process.env.JWT_SECRET);
+
   try {
     console.log("REQ BODY 👉", req.body);
     const response = await service.register(req.body);
@@ -20,8 +22,14 @@ module.exports.register = async (req, res) => {
 };
 
 module.exports.login = async (req, res) => {
+  console.log("JWT SECRET (LOGIN):", process.env.JWT_SECRET);
+
   try {
     const response = await service.login(req.body);
+    
+
+    console.log("JWT SECRET (LOGIN):", process.env.JWT_SECRET);
+
 
     return res.status(response.code).json({
       status: response.status,
