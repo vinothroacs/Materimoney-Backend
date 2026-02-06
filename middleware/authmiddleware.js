@@ -53,11 +53,12 @@ console.log("VERIFY SECRET:", process.env.JWT_SECRET);
     console.log("TOKEN DECODED:", decoded);
 
     req.user = {
-      id: decoded.userid || decoded.id,      // 👈 FIX
+      id: decoded.userid,      // 👈 FIX
       email: decoded.email,
       roleid: decoded.roleid,
       status: decoded.status,
     };
+    console.log("REQ test",req.user)
     next();
   } catch (err) {
     console.error("JWT ERROR 👉", err.message);
