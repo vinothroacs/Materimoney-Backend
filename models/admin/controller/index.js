@@ -1,5 +1,10 @@
 const adminService = require("../services/index");
 
+// const { sendMail } = require("../../../utils/mailer");
+// const { acceptTemplate } = require("../../../utils/emailTemplates");
+
+
+
 module.exports.getPendingForms = async (req, res) => {
   try {
     const result = await adminService.getPendingForms();
@@ -96,48 +101,87 @@ module.exports.getPendingUsers = async (req, res) => {
 };
 
 // ✅ ADMIN APPROVE
+// module.exports.adminApproveUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const result = await adminService.adminApproveUser(id);
+
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Profile approved successfully",
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Approve failed",
+//     });
+//   }
+// };
+
+
+
+// module.exports.adminRejectUser = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const result = await adminService.adminRejectUser(id);
+
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Profile rejected successfully",
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Reject failed",
+//     });
+//   }
+// };
+
+// controller
 module.exports.adminApproveUser = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await adminService.adminApproveUser(id);
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
+    if (!result.success) return res.status(400).json(result);
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile approved successfully",
-    });
+    res.json({ success: true, message: "Profile approved successfully" });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Approve failed",
-    });
+    res.status(500).json({ success: false, message: "Approve failed" });
   }
 };
 
-// ❌ ADMIN REJECT
 module.exports.adminRejectUser = async (req, res) => {
   try {
+     console.log("PARAMS 👉", req.params);
+    console.log("BODY 👉", req.body);
     const { id } = req.params;
-    const result = await adminService.adminRejectUser(id);
+    const { reason } = req.body;
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
+    const result = await adminService.adminRejectUser(id, reason);
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile rejected successfully",
-    });
+    if (!result.success) return res.status(400).json(result);
+
+    res.json({ success: true, message: "Profile rejected successfully" });
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: "Reject failed",
-    });
+     console.error("CONTROLLER ERROR 👉", err);
+    res.status(500).json({ success: false, message: "Reject failed" });
   }
 };
+
+
+
+
+
+
 
 // 👁 TOGGLE VISIBILITY
 module.exports.adminToggleVisibility = async (req, res) => {

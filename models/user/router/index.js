@@ -17,6 +17,7 @@ router.post(
 //connection card
 
 router.get("/connections",authmiddleware, controller.getVisibleConnections);
+
 router.get("/profile/:id",authmiddleware,controller.getUserProfile);
 router.post("/connection",authmiddleware,controller.sendConnectionRequest);
 router.get("/get-connection",authmiddleware,controller.getReceivedConnections);

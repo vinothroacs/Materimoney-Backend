@@ -1,4 +1,6 @@
 const db = require("../../../config/db");
+const { sendMail } = require("../../../utils/mailer");
+const { acceptTemplate ,rejectTemplate} = require("../../../utils/emailTemplates");
 
 module.exports.getPendingForms = async () => {
   try {
@@ -171,39 +173,102 @@ module.exports.getPendingUsers = async () => {
   }
 };
 
-// ✅ ADMIN APPROVE
-module.exports.adminApproveUser = async (id) => {
-  try {
-    const updated = await db("profiles")
-      .where({ id })
-      .update({ status: "ACTIVE" });
+// // ✅ ADMIN APPROVE
+// module.exports.adminApproveUser = async (id) => {
+//   try {
+//     const updated = await db("profiles")
+//       .where({ id })
+//       .update({ status: "ACTIVE" });
 
-    if (!updated) {
-      return { success: false, message: "Profile not found" };
-    }
+//     if (!updated) {
+//       return { success: false, message: "Profile not found" };
+//     }
+
+//     return { success: true };
+//   } catch (err) {
+//     return { success: false, error: err.message };
+//   }
+// };
+
+// // ❌ ADMIN REJECT
+// module.exports.adminRejectUser = async (id) => {
+//   try {
+//     const updated = await db("profiles")
+//       .where({ id })
+//       .update({ status: "REJECTED" });
+
+//     if (!updated) {
+//       return { success: false, message: "Profile not found" };
+//     }
+
+//     return { success: true };
+//   } catch (err) {
+//     return { success: false, error: err.message };
+//   }
+// };
+
+// service
+
+module.exports.adminApproveUser = async (profileId) => {
+  try {
+    const profile = await db("profiles").where({ id: profileId }).first();
+    if (!profile) return { success: false, message: "Profile not found" };
+
+    const user = await db("users").where({ id: profile.user_id }).first();
+    if (!user) return { success: false, message: "User not found" };
+
+    await db("profiles").where({ id: profileId }).update({ status: "ACTIVE" });
+    await db("users").where({ id: user.id }).update({ status: "ACTIVE" });
+
+    // 📧 welcome mail
+    await sendMail({
+      to: user.email,
+      subject: "Welcome to Kalyanamalai 💍",
+      html: acceptTemplate(profile.full_name),
+    });
 
     return { success: true };
   } catch (err) {
-    return { success: false, error: err.message };
+    console.error("Approve error:", err);
+    return { success: false, message: "Approve failed" };
   }
 };
 
-// ❌ ADMIN REJECT
-module.exports.adminRejectUser = async (id) => {
+module.exports.adminRejectUser = async (profileId, reason) => {
   try {
-    const updated = await db("profiles")
-      .where({ id })
-      .update({ status: "REJECTED" });
+     console.log("SERVICE profileId 👉", profileId);
+    console.log("SERVICE reason 👉", reason);
+    const profile = await db("profiles").where({ id: profileId }).first();
+    console.log("PROFILE 👉", profile);
+    if (!profile) return { success: false, message: "Profile not found" };
 
-    if (!updated) {
-      return { success: false, message: "Profile not found" };
-    }
+    const user = await db("users").where({ id: profile.user_id }).first();
+    console.log("USER 👉", user);
+    if (!user) return { success: false, message: "User not found" };
+
+    await db("profiles").where({ id: profileId }).update({ status: "REJECTED" });
+    await db("users").where({ id: user.id }).update({ status: "REJECTED" });
+
+    // 📧 reject mail
+    await sendMail({
+      to: user.email,
+      subject: "Profile Update – Kalyanamalai",
+      html: rejectTemplate(profile.full_name, reason),
+    });
 
     return { success: true };
   } catch (err) {
-    return { success: false, error: err.message };
+     console.error("SERVICE ERROR 👉", err);
+    console.error("Reject error:", err);
+    return { success: false, message: "Reject failed" };
   }
 };
+
+
+
+
+
+
 
 // 👁 TOGGLE VISIBILITY
 module.exports.adminToggleVisibility = async (id) => {
