@@ -5,12 +5,12 @@ module.exports.getPendingForms = async () => {
     const pendingForms = await db("users")
       .where({ status: "PENDING" });
 
-    // if (!pendingForms || pendingForms.length === 0) {
-    //   return {
-    //     success: false,
-    //     message: "No pending forms found",
-    //   };
-    // }
+    if (!pendingForms || pendingForms.length === 0) {
+      return {
+        success: false,
+        message: "No pending forms found",
+      };
+    }
 
     return {
       success: true,
@@ -140,12 +140,13 @@ const mapProfile = (p) => ({
 
   status: p.status,
   createdAt: p.created_at,
+  is_active:Number(p.is_active)
 });
 
 // 🔹 GET ALL USERS
 module.exports.getAllUsers = async () => {
   try {
-    const rows = await db("profiles").orderBy("created_at", "desc");
+   const rows = await db("profiles").select("*");
     return {
       success: true,
       data: rows.map(mapProfile),
@@ -176,7 +177,7 @@ module.exports.adminApproveUser = async (id) => {
   try {
     const updated = await db("profiles")
       .where({ id })
-      .update({ status: "ACTIVE" });
+      .update({ status: 1 });
 
     if (!updated) {
       return { success: false, message: "Profile not found" };
@@ -206,24 +207,48 @@ module.exports.adminRejectUser = async (id) => {
 };
 
 // 👁 TOGGLE VISIBILITY
-module.exports.adminToggleVisibility = async (id) => {
+// services/admin.service.js
+module.exports.adminToggleVisibility = async (props = {}) => {
+  const { id, key } = props;
+
+  if (id === undefined || key === undefined) {
+    return {
+      success: false,
+      message: "id and key are required",
+    };
+  }
+
   try {
-    const profile = await db("profiles").where({ id }).first();
+    const profile = await db("profiles")
+      .where({ id })
+      .first();
+
     if (!profile) {
-      return { success: false, message: "Profile not found" };
+      return {
+        success: false,
+        message: "Profile not found",
+      };
     }
 
-    const newValue = profile.is_public ? 0 : 1;
+    const newValue = key ? 1 : 0;
 
     await db("profiles")
       .where({ id })
-      .update({ is_public: newValue });
+      .update({ is_active: newValue });
 
-    return { success: true, isPublic: Boolean(newValue) };
+    return {
+      success: true,
+      is_active: newValue,
+    };
   } catch (err) {
-    return { success: false, error: err.message };
+    return {
+      success: false,
+      error: err.message,
+    };
   }
 };
+
+
 
 
 // ================= DASHBOARD STATS =================
@@ -235,12 +260,12 @@ module.exports.getAdminDashboardStats = async () => {
 
     // Active profiles (status = ACTIVE)
     const [{ activeUsers }] = await db("profiles")
-      .where({ status: "ACTIVE" })
+      .where({ is_active: 1 })
       .count("id as activeUsers");
 
     // Inactive profiles (status != ACTIVE)
     const [{ inactiveUsers }] = await db("profiles")
-      .whereNot({ status: "ACTIVE" })
+      .where({ is_active: 0 })
       .count("id as inactiveUsers");
 
     // Male count

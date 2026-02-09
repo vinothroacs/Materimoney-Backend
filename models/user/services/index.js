@@ -267,6 +267,7 @@ module.exports.submitProfile = async (payload, files, user) => {
 
   is_public: payload.privacy === "Public" ? 1 : 0,
   created_at: new Date(),
+  is_active: 1
 };
 
 
@@ -813,7 +814,7 @@ exports.updatePrivacy = async (userId, privacy) => {
     .where({ user_id: userId })
     .update({
       privacy,
-      is_public: privacy === "Public" ? 1 : 0,
+      is_public: privacy === "Puplic" ? 1 : 0,
     });
 
   return { success: true };

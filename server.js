@@ -30,7 +30,7 @@ console.log("AUTH HEADER 👉", req.headers.authorization);
 });
 
 app.use("/api",routes)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));       
 
 
 

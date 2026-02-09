@@ -142,22 +142,21 @@ module.exports.adminRejectUser = async (req, res) => {
 // 👁 TOGGLE VISIBILITY
 module.exports.adminToggleVisibility = async (req, res) => {
   try {
-    const { id } = req.params;
-    const result = await adminService.adminToggleVisibility(id);
+    const { id, key } = req.body;
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Visibility updated",
-      isPublic: result.isPublic,
+    const response = await adminService.adminToggleVisibility({
+      id,
+      key
     });
-  } catch (err) {
+
+    return res
+      .status(response.success ? 200 : 400)
+      .json(response);
+
+  } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Visibility update failed",
+      message: error.message
     });
   }
 };
