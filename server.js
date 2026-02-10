@@ -10,6 +10,9 @@ const path = require("path");
 
 const app = express();
 
+app.use("/uploads", express.static(path.join(__dirname, "../uploads/photos")));       
+
+
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true,
@@ -30,7 +33,6 @@ console.log("AUTH HEADER 👉", req.headers.authorization);
 });
 
 app.use("/api",routes)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));       
 
 
 
