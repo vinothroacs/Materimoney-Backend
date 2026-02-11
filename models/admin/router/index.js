@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controller/index");
+const { adminToggleVisibility } = require("../services");
 
 // Pending forms
 router.get("/forms/pending", controller.getPendingForms);
+
 // Reject user
 router.put("/reject/:id", controller.rejectUser);
 
@@ -23,7 +25,8 @@ router.put("/users/:id/approve", controller.adminApproveUser);
 router.put("/users/:id/reject", controller.adminRejectUser);
 
 // 👁 Toggle public / private
-router.put("/users/:id/visibility", controller.adminToggleVisibility);
+router.put('/users/visibility', controller.adminToggleVisibility);
+
 
 
 // 🔹 DASHBOARD STATS
