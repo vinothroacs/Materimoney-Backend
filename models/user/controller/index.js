@@ -614,21 +614,71 @@ module.exports.withdrawConnection = async (req, res) => {
   }
 };
 
-////  Update Profile
-module.exports.updateUserProfile = async (req, res) => {
+
+
+
+/**
+ * GET MY PROFILE
+ */
+module.exports.getMyProfile = async (req, res) => {
   try {
-    const userid = req.user.id; // 🔥 from token
+    const result = await service.getMyProfile(req.user.id);
+    console.log("test user.id",req.user.id)
 
-    const response = await service.updateUserProfile({
-      userid,
-      ...req.body,
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    res.json(result);
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
     });
+  }
+};
 
-    return res.status(200).json({
+
+/**
+ * UPDATE PROFILE (TEXT DATA)
+ */
+
+
+  exports.updateProfile = async (req, res) => {
+  try {
+    console.log("REQ.USER 👉", req.user);
+
+    const userId = req.user.id;
+    const body = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User id missing",
+      });
+    }
+
+    if (!body || Object.keys(body).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Request body is empty",
+      });
+    }
+
+    const result = await service.updateProfile(userId, body);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.json({
       success: true,
-      message: response.message,
+      message: "Profile updated successfully",
     });
-  } catch (error) {
+
+  } catch (err) {
+    console.error("UPDATE PROFILE ERROR 👉", err);
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -636,30 +686,69 @@ module.exports.updateUserProfile = async (req, res) => {
   }
 };
 
-//upload Photos
 
-module.exports.uploadProfilePhoto = async (req, res) => {
+
+/**
+ * UPDATE PHOTO
+ */
+exports.updatePhoto = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const file = req.file;
-
-    if (!file) {
+    if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Photo file is required",
+        message: "No photo uploaded"
       });
     }
 
-    const response = await service.uploadProfilePhoto({
-      userId,
-      file,
+    const result = await service.updatePhoto(
+      req.user.id,
+      req.file
+    );
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.json({
+      success: true,
+      message: "Photo updated successfully"
     });
 
-    return res.status(200).json(response);
-  } catch (error) {
-    return res.status(500).json({
+  } catch (err) {
+    res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message
     });
   }
+};
+
+
+/**
+ * UPDATE HOROSCOPE
+ */
+exports.updateHoroscope = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: "No horoscope uploaded" });
+  }
+
+  const result = await service.updateHoroscope(req.user.id, req.file);
+  if (!result.success) return res.status(400).json(result);
+
+  res.json({ success: true, message: "Horoscope updated" });
+};
+
+/**
+ * UPDATE PRIVACY
+ */
+exports.updatePrivacy = async (req, res) => {
+  const { privacy } = req.body;
+
+  if (!["Public", "Private"].includes(privacy)) {
+    return res.status(400).json({ success: false, message: "Invalid privacy" });
+  }
+
+  const result = await service.updatePrivacy(req.user.id, privacy);
+  if (!result.success) return res.status(400).json(result);
+
+  res.json({ success: true, message: "Privacy updated" });
 };

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controller/index");
-const { adminToggleVisibility } = require("../services");
+const { adminToggleVisibility } = require("../services/index");
 
 // Pending forms
 router.get("/forms/pending", controller.getPendingForms);

@@ -91,8 +91,14 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controller/index");
-const upload = require("../../../middleware/upload"); // 👈 ADD THIS
-const authMiddleware = require("../../../middleware/authmiddleware");
+// <<<<<<< HEAD
+// const upload = require("../../../middleware/upload"); // 👈 ADD THIS
+// const authMiddleware = require("../../../middleware/authmiddleware");
+// =======
+// const upload = require("../../../middleware/upload");
+// const path=require("path") // 👈 ADD THIS
+// const authMiddleware= require("../../../middleware/authmiddleware")
+// >>>>>>> c5a6678e50b2f4535160c6ca054d6580069718e4
 
 router.post(
   "/form/submit",
@@ -108,8 +114,13 @@ router.post(
 
 router.get("/connections", authMiddleware, controller.getVisibleConnections);
 
-// router.get("/profile/:id", authMiddleware, controller.getUserProfile);
-router.post("/connection", authMiddleware, controller.sendConnectionRequest);
+// <<<<<<< HEAD
+// // router.get("/profile/:id", authMiddleware, controller.getUserProfile);
+// =======
+// router.get("/profile", authMiddleware, controller.getUserProfile);
+
+// >>>>>>> c5a6678e50b2f4535160c6ca054d6580069718e4
+// router.post("/connection", authMiddleware, controller.sendConnectionRequest);
 
 //My connection user
 
@@ -120,8 +131,12 @@ router.get(
   controller.getReceivedConnections,
 );
 
-// 📤 Get Sent Connections
-router.get("/connections/sent", authMiddleware, controller.getSentConnections);
+// <<<<<<< HEAD
+// // 📤 Get Sent Connections
+// =======
+// // 📤 Get Sent Connections0000
+// >>>>>>> c5a6678e50b2f4535160c6ca054d6580069718e4
+// router.get("/connections/sent", authMiddleware, controller.getSentConnections);
 
 // Accept Connection
 router.post(
@@ -164,4 +179,11 @@ router.put(
 
 
 
-module.exports = router;
+// <<<<<<< HEAD
+ module.exports = router;
+// =======
+// module.exports = router;
+
+
+
+// >>>>>>> c5a6678e50b2f4535160c6ca054d6580069718e4

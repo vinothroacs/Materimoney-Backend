@@ -1,10 +1,8 @@
-const jwt =require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 
-const db = require("../../../config/db")
-
+const db = require("../../../config/db");
 
 module.exports.login = async (props) => {
-  
   const { email, password } = props;
 
   try {
@@ -39,23 +37,22 @@ module.exports.login = async (props) => {
         status: user.status,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "12h" }
+      { expiresIn: "12h" },
     );
 
-   return {
-  code: 200,
-  status: true,
-  message: "Login successful",
-  response: token,
-  roleid: user.roleid,
-  status: user.status,
-  user: {
-    id: user.id,        // ✅ IMPORTANT
-    name: user.name,
-    email: user.email
-  }
-};
-
+    return {
+      code: 200,
+      status: true,
+      message: "Login successful",
+      response: token,
+      roleid: user.roleid,
+      status: user.status,
+      user: {
+        id: user.id, // ✅ IMPORTANT
+        name: user.name,
+        email: user.email,
+      },
+    };
   } catch (error) {
     console.error("Auth Service Login Error:", error);
 
@@ -68,9 +65,9 @@ module.exports.login = async (props) => {
 };
 
 module.exports.register = async (props) => {
-  const { name, email, password,phone } = props;
+  const { name, email, password, phone } = props;
 
-    try {
+  try {
     // 🚫 Block admin registration
     if (email === "admin@gmail.com") {
       return {
@@ -80,10 +77,7 @@ module.exports.register = async (props) => {
       };
     }
 
-
-    const existingUser = await db("users")
-      .where({ email })
-      .first();
+    const existingUser = await db("users").where({ email }).first();
 
     if (existingUser) {
       return {
@@ -112,7 +106,7 @@ module.exports.register = async (props) => {
         status: "ACTIVE",
       },
       process.env.JWT_SECRET,
-      { expiresIn: "12h" }
+      { expiresIn: "12h" },
     );
 
     return {
@@ -120,7 +114,7 @@ module.exports.register = async (props) => {
       status: true,
       message: "Registration successful",
       response: token,
-      roleid:2,
+      roleid: 2,
     };
   } catch (error) {
     console.error("Auth Service Register Error:", error);
@@ -132,3 +126,4 @@ module.exports.register = async (props) => {
     };
   }
 };
+

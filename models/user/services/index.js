@@ -818,11 +818,16 @@ module.exports.submitProfile = async (payload, files, user) => {
     const insertData = {
   user_id: user.id,
 
+    const insertData = {
+  user_id: user.id,
+
   full_name: payload.fullName,
   gender: payload.gender,
   dob: payload.dob,
   birth_time: convertTo24Hour(payload.birthTime),
+  birth_time: convertTo24Hour(payload.birthTime),
   marital_status: payload.maritalStatus,
+
 
   education: payload.education,
   occupation: payload.occupation,
@@ -839,6 +844,7 @@ module.exports.submitProfile = async (payload, files, user) => {
   raasi: payload.raasi,
   star: payload.star,
   dosham: payload.dosham || "No",
+  dosham: payload.dosham || "No",
 
   birth_place: payload.city,
 
@@ -851,15 +857,37 @@ module.exports.submitProfile = async (payload, files, user) => {
 
   privacy: payload.privacy,
   is_public: payload.privacy === "Public" ? 1 : 0,
+  is_public: payload.privacy === "Public" ? 1 : 0,
 
   horoscope_uploaded: files?.horoscope ? 1 : 0,
   horoscope_file_name: files?.horoscope?.[0]?.filename || null,
+  horoscope_file_name: files?.horoscope?.[0]?.filename || null,
   horoscope_file_url: files?.horoscope
+    ? `/uploads/horoscope/${files.horoscope[0].filename}`
     ? `/uploads/horoscope/${files.horoscope[0].filename}`
     : null,
 
   photo: files?.photo?.[0]?.filename || null,
+  photo: files?.photo?.[0]?.filename || null,
 
+  is_active: 1,
+};
+
+    console.log("USER FROM JWT 👉", user);
+
+    // ✅ Duplicate profile check (email-based)
+    const existingProfile = await db("profiles")
+      .where({ email: user.email })
+      .first();
+
+    if (existingProfile) {
+      return {
+        success: false,
+        message: "Profile already submitted for this user",
+      };
+    }
+
+    // ✅ Insert profile
   is_active: 1,
 };
 
@@ -881,8 +909,10 @@ module.exports.submitProfile = async (payload, files, user) => {
 
     const [profileId] = await db("profiles").insert(insertData);
     console.log("test id ",profileId)
+    console.log("test id ",profileId)
 
     // ✅ Update user status using userid from JWT
+    await db("users").where({ id: user.id }).update({ status: "PENDING" });
     await db("users").where({ id: user.id }).update({ status: "PENDING" });
 
     return {
@@ -893,8 +923,13 @@ module.exports.submitProfile = async (payload, files, user) => {
       
       
       
+    
+      
+      
+      
     };
   } catch (error) {
+    console.error("Submit Profile Error namma tha:", error);
     console.error("Submit Profile Error namma tha:", error);
     return {
       success: false,
@@ -910,18 +945,27 @@ module.exports.getVisibleConnections = async (userId) => {
     return {
       success: true,
       data: profiles, // 👈 IMPORTANT
+      data: profiles, // 👈 IMPORTANT
       message: profiles.length
         ? "Data fetched successfully"
+        : "No data available",
         : "No data available",
     };
   } catch (err) {
     return {
       success: false,
       message: err.message,
+      message: err.message,
     };
   }
 };
 
+// module.exports.getUserProfileService = async (props = {}) => {
+
+//   const {userid} = props;
+
+//   try {
+//     const profile = await db("profiles").where({ user_id: userid }).first();
 // module.exports.getUserProfileService = async (props = {}) => {
 
 //   const {userid} = props;
@@ -934,7 +978,31 @@ module.exports.getVisibleConnections = async (userId) => {
 //         message: "Profile not found"
 //       };
 //     }
+//     if (!profile) {
+//       return {
+//         message: "Profile not found"
+//       };
+//     }
 
+//     return {
+//       success: true,
+//       // data: {
+//       //   ...profile,
+//       //   horoscope: {
+//       //     uploaded: profile.horoscope_uploaded === 1,
+//       //     fileUrl: profile.horoscope_file_url,
+//       //     fileName: profile.horoscope_file_name,
+//       //   },
+//       // },
+//       data : profile,
+//       message : "Profile data fetched successfully",
+//     };
+//   } catch (err) {
+//     return {
+//       message: err.message
+//     };
+//   }
+// };
 //     return {
 //       success: true,
 //       // data: {
@@ -964,13 +1032,16 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       .first();
 
     if (!profile || !profile.user_id) {
+    if (!profile || !profile.user_id) {
       return {
         success: false,
+        message: "Profile not found or inactive",
         message: "Profile not found or inactive",
       };
     }
 
     const toUserId = profile.user_id;
+
 
     // 3. Ensure target user exists
     const userExists = await db("users")
@@ -981,6 +1052,7 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       return {
         success: false,
         message: "User does not exist",
+        message: "User does not exist",
       };
     }
 
@@ -989,12 +1061,14 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       .where({
         from_user: fromUserId,
         to_user: toUserId,
+        to_user: toUserId,
       })
       .first();
 
     if (existing) {
       return {
         success: false,
+        message: "Connection request already sent",
         message: "Connection request already sent",
       };
     }
@@ -1004,12 +1078,14 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       from_user: fromUserId,
       to_user: toUserId,
       status: "Sent",
+      status: "Sent",
     });
 
     return { success: true };
   } catch (error) {
     return {
       success: false,
+      message: error.message,
       message: error.message,
     };
   }
@@ -1049,7 +1125,72 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
 // };
 
 // module.exports.rejectConnection = async (connectionId, userId) => {
+// module.exports.acceptConnection = async (connectionId, userId) => {
+//   const connection = await db("connections")
+//     .where({ id: connectionId })
+//     .first();
+
+//   if (!connection) {
+//     return { success: false, message: "Connection not found" };
+//   }
+
+//   if (connection.to_user !== userId) {
+//     return { success: false, message: "Unauthorized" };
+//   }
+
+//   await db("connections")
+//     .where({ id: connectionId })
+//     .update({ status: "Accepted" });
+
+//   return { success: true };
+// };
+
+//User Reject Connections
+
+// // ✅ ADD THIS FUNCTION
+// const isExpired = (createdAt) => {
+//   const EXPIRY_HOURS = 24;
+
+//   const now = new Date();
+//   const created = new Date(createdAt);
+
+//   const diffInHours = (now - created) / (1000 * 60 * 60);
+//   return diffInHours > EXPIRY_HOURS;
+// };
+
+// module.exports.rejectConnection = async (connectionId, userId) => {
 //   try {
+//     const connection = await db("connections")
+//       .where({ id: connectionId, to_user: userId })
+//       .first();
+
+//     if (!connection) {
+//       return {
+//         success: false,
+//         message: "Connection not found"
+//       };
+//     }
+
+//      // ✅ ADD THIS CHECK
+//     if (connection.status === "Rejected") {
+//       return {
+//         success: false,
+//         message: "Connection already rejected"
+//       };
+//     }
+
+//     if (isExpired(connection.created_at)) {
+//       return {
+//         success: false,
+//         message: "Connection request expired"
+//       };
+//     }
+
+//     await db("connections")
+//       .where({ id: connectionId })
+//       .update({ status: "Rejected" });
+
+//     return { success: true };
 //     const connection = await db("connections")
 //       .where({ id: connectionId, to_user: userId })
 //       .first();
