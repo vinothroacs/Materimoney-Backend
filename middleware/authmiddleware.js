@@ -1,3 +1,32 @@
+// // middleware/auth.js
+// const jwt = require("jsonwebtoken");
+
+// module.exports = (req, res, next) => {
+//   try {
+//     const authHeader = req.headers.authorization;
+//     if (!authHeader) {
+//       return res.status(401).json({ message: "No token provided" });
+//     }
+
+//     const token = authHeader.split(" ")[1];
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+//     req.user = {
+//       id: decoded.id,          // ✅ make sure JWT has 'id'
+//       email: decoded.email,
+//       roleid: decoded.roleid,
+//       status: decoded.status,
+//     };
+
+//     next();
+//   } catch (err) {
+//     return res.status(401).json({ message: "Invalid token" });
+//   }
+// };
+
+
+//new Changes
+
 // const jwt = require("jsonwebtoken");
 
 // exports.verifyToken = (req, res, next) => {
@@ -58,6 +87,7 @@ console.log("VERIFY SECRET:", process.env.JWT_SECRET);
       roleid: decoded.roleid,
       status: decoded.status,
     };
+    
     console.log("REQ test",req.user)
     next();
   } catch (err) {

@@ -10,7 +10,11 @@ const path = require("path");
 
 const app = express();
 
-app.use("/uploads", express.static(path.join(__dirname, "")));       
+// <<<<<<< HEAD
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));       
+// =======
+// app.use("/uploads", express.static(path.join(__dirname, "")));       
+// >>>>>>> c5a6678e50b2f4535160c6ca054d6580069718e4
 
 
 app.use(cors({
