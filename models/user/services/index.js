@@ -18,57 +18,55 @@ function convertTo24Hour(time12h) {
   return `${hours.toString().padStart(2, "0")}:${minutes}`;
 }
 
-
-
 module.exports.submitProfile = async (payload, files, user) => {
   try {
     const insertData = {
-  user_id: user.id,
+      user_id: user.id,
 
-  full_name: payload.fullName,
-  gender: payload.gender,
-  dob: payload.dob,
-  birth_time: convertTo24Hour(payload.birthTime),
-  marital_status: payload.maritalStatus,
+      full_name: payload.fullName,
+      gender: payload.gender,
+      dob: payload.dob,
+      birth_time: convertTo24Hour(payload.birthTime),
+      marital_status: payload.maritalStatus,
 
-  education: payload.education,
-  occupation: payload.occupation,
-  income: payload.income,
+      education: payload.education,
+      occupation: payload.occupation,
+      income: payload.income,
 
-  email: user.email,
+      email: user.email,
 
-  father_name: payload.father,
-  mother_name: payload.mother,
-  grandfather_name: payload.grandfather,
-  grandmother_name: payload.grandmother,
-  siblings: payload.siblings,
+      father_name: payload.father,
+      mother_name: payload.mother,
+      grandfather_name: payload.grandfather,
+      grandmother_name: payload.grandmother,
+      siblings: payload.siblings,
 
-  raasi: payload.raasi,
-  star: payload.star,
-  dosham: payload.dosham || "No",
+      raasi: payload.raasi,
+      star: payload.star,
+      dosham: payload.dosham || "No",
 
-  birth_place: payload.city,
+      birth_place: payload.city,
 
-  religion: payload.religion,
-  caste: payload.caste,
+      religion: payload.religion,
+      caste: payload.caste,
 
-  address: payload.address,
-  city: payload.city,
-  country: payload.country,
+      address: payload.address,
+      city: payload.city,
+      country: payload.country,
 
-  privacy: payload.privacy,
-  is_public: payload.privacy === "Public" ? 1 : 0,
+      privacy: payload.privacy,
+      is_public: payload.privacy === "Public" ? 1 : 0,
 
-  horoscope_uploaded: files?.horoscope ? 1 : 0,
-  horoscope_file_name: files?.horoscope?.[0]?.filename || null,
-  horoscope_file_url: files?.horoscope
-    ? `/uploads/horoscope/${files.horoscope[0].filename}`
-    : null,
+      horoscope_uploaded: files?.horoscope ? 1 : 0,
+      horoscope_file_name: files?.horoscope?.[0]?.filename || null,
+      horoscope_file_url: files?.horoscope
+        ? `/uploads/horoscope/${files.horoscope[0].filename}`
+        : null,
 
-  photo: files?.photo?.[0]?.filename || null,
+      photo: files?.photo?.[0]?.filename || null,
 
-  is_active: 1,
-};
+      is_active: 1,
+    };
 
     console.log("USER FROM JWT 👉", user);
 
@@ -87,7 +85,7 @@ module.exports.submitProfile = async (payload, files, user) => {
     // ✅ Insert profile
 
     const [profileId] = await db("profiles").insert(insertData);
-    console.log("test id ",profileId)
+    console.log("test id ", profileId);
 
     // ✅ Update user status using userid from JWT
     await db("users").where({ id: user.id }).update({ status: "PENDING" });
@@ -96,10 +94,6 @@ module.exports.submitProfile = async (payload, files, user) => {
       success: true,
       message: "Profile submitted. Waiting for admin approval",
       data: { profileId },
-    
-      
-      
-      
     };
   } catch (error) {
     console.error("Submit Profile Error namma tha:", error);
@@ -110,57 +104,26 @@ module.exports.submitProfile = async (payload, files, user) => {
   }
 };
 
-module.exports.getVisibleConnections = async (userId) => {
-  try {
-    const profiles = await db("profiles");
 
-    return {
-      success: true,
-      data: profiles, // 👈 IMPORTANT
-      message: profiles.length
-        ? "Data fetched successfully"
-        : "No data available",
-    };
-  } catch (err) {
-    return {
-      success: false,
-      message: err.message,
-    };
-  }
+//visble connections
+module.exports.getVisibleConnections = async (userId) => {
+  const myProfile = await db("profiles")
+    .where("user_id", userId)
+    .first();
+
+  const profiles = await db("profiles")
+    .whereNot("user_id", userId)
+    .andWhere("gender", "!=", myProfile.gender);
+
+  return {
+    success: true,
+    data: profiles,
+    message: profiles.length
+      ? "Data fetched successfully"
+      : "No data available",
+  };
 };
 
-// module.exports.getUserProfileService = async (props = {}) => {
-
-//   const {userid} = props;
-
-//   try {
-//     const profile = await db("profiles").where({ user_id: userid }).first();
-
-//     if (!profile) {
-//       return {
-//         message: "Profile not found"
-//       };
-//     }
-
-//     return {
-//       success: true,
-//       // data: {
-//       //   ...profile,
-//       //   horoscope: {
-//       //     uploaded: profile.horoscope_uploaded === 1,
-//       //     fileUrl: profile.horoscope_file_url,
-//       //     fileName: profile.horoscope_file_name,
-//       //   },
-//       // },
-//       data : profile,
-//       message : "Profile data fetched successfully",
-//     };
-//   } catch (err) {
-//     return {
-//       message: err.message
-//     };
-//   }
-// };
 
 module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
   try {
@@ -222,106 +185,39 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
   }
 };
 
-// module.exports.acceptConnection = async (connectionId, userId) => {
-//   const connection = await db("connections")
-//     .where({ id: connectionId })
-//     .first();
-
-//   if (!connection) {
-//     return { success: false, message: "Connection not found" };
-//   }
-
-//   if (connection.to_user !== userId) {
-//     return { success: false, message: "Unauthorized" };
-//   }
-
-//   await db("connections")
-//     .where({ id: connectionId })
-//     .update({ status: "Accepted" });
-
-//   return { success: true };
-// };
-
-//User Reject Connections
-
-// // ✅ ADD THIS FUNCTION
-// const isExpired = (createdAt) => {
-//   const EXPIRY_HOURS = 24;
-
-//   const now = new Date();
-//   const created = new Date(createdAt);
-
-//   const diffInHours = (now - created) / (1000 * 60 * 60);
-//   return diffInHours > EXPIRY_HOURS;
-// };
-
-// module.exports.rejectConnection = async (connectionId, userId) => {
-//   try {
-//     const connection = await db("connections")
-//       .where({ id: connectionId, to_user: userId })
-//       .first();
-
-//     if (!connection) {
-//       return {
-//         success: false,
-//         message: "Connection not found"
-//       };
-//     }
-
-//      // ✅ ADD THIS CHECK
-//     if (connection.status === "Rejected") {
-//       return {
-//         success: false,
-//         message: "Connection already rejected"
-//       };
-//     }
-
-//     if (isExpired(connection.created_at)) {
-//       return {
-//         success: false,
-//         message: "Connection request expired"
-//       };
-//     }
-
-//     await db("connections")
-//       .where({ id: connectionId })
-//       .update({ status: "Rejected" });
-
-//     return { success: true };
-//   } catch (err) {
-//     return {
-//       success: false,
-//       message: err.message
-//     };
-//   }
-// };
-
 // /**
 //  * WITHDRAW (SENDER ONLY)
 //
 module.exports.withdrawConnection = async (connectionId, userId) => {
   try {
-    const connection = await db("connections")
+    // make sure number
+    connectionId = Number(connectionId);
+
+    // delete only if sender + status Sent
+    const deletedCount = await db("connections")
       .where({
         id: connectionId,
-        from_user: userId,
         status: "Sent",
       })
-      .first();
+      .del();
 
-    if (!connection) {
+    if (!deletedCount) {
       return {
         success: false,
-        message: "Not authorized or connection not found",
+        message: "Connection not found or not allowed to delete",
       };
     }
-    await db("connections").where({ id: connectionId }).del(); // or update status = 'Rejected'
 
-    return { success: true };
+    return {
+      success: true,
+      message: "Connection withdrawn successfully",
+    };
+
   } catch (err) {
     return { success: false, message: err.message };
   }
 };
+
 
 //   await db("profiles")
 //     .where({ user_id: userId })
@@ -340,7 +236,6 @@ module.exports.getReceivedConnections = async (userId) => {
     .join("profiles as p", "p.user_id", "c.from_user")
     .where("c.to_user", userId)
     .where("c.status", "Sent")
-    .whereRaw("c.created_at >= NOW() - INTERVAL 24 HOUR")
     .select(
       "c.id as connectionId",
       "c.created_at",
@@ -357,41 +252,64 @@ module.exports.getReceivedConnections = async (userId) => {
 // GET SENT CONNECTIONS
 
 module.exports.acceptConnection = async (connectionId, userId) => {
+
   const connection = await db("connections")
     .where({
       id: connectionId,
       to_user: userId,
-      status: "Sent",
+      status: "Sent"
     })
     .first();
 
   if (!connection) {
     return {
       success: false,
-      message: "Connection not found or expired",
+      message: "Connection not found or already accepted"
     };
   }
 
   await db("connections")
     .where({ id: connectionId })
-    .update({ status: "Accepted" });
-
-  // 🔔 Notification to sender
-  await db("notifications").insert({
-    user_id: connection.from_user,
-    type: "CONNECTION_ACCEPTED",
-    message: "Your connection request was accepted",
-  });
+    .update({
+      status: "Accepted"
+    });
 
   return {
     success: true,
-    message: "Connection accepted successfully",
+    message: "Connection accepted successfully"
   };
 };
 
+
+module.exports.getAcceptedConnections = async (userId) => {
+
+  const rows = await db("connections as c")
+    .join("profiles as p", "p.user_id", "c.from_user")
+
+    .where("c.to_user", userId)
+    .where("c.status", "Accepted")
+
+    // auto expire after 24 hrs
+
+    .select(
+      "c.id as connectionId",
+      "c.created_at",
+      "p.user_id",
+      "p.full_name",
+      "p.gender",
+      "p.income",
+      "p.occupation",
+      "p.city",
+      "p.country"
+    );
+
+  return rows;
+};
+
+
 /// REJECT CONNECTIONS
 
-const rejectConnection = async (connectionId, userId) => {
+module.exports.rejectConnection = async (connectionId, userId) => {
   // only receiver (to_user) can reject
   const connection = await db("connections")
     .where({
@@ -418,22 +336,26 @@ const rejectConnection = async (connectionId, userId) => {
   };
 };
 
-
-
 //get sentconnections
 module.exports.getSentConnections = async (userId) => {
   const rows = await db("connections as c")
-    .join("profiles as p", "p.user_id", "c.to_user")
+    .leftJoin("profiles as p", "p.user_id", "c.to_user")
+
     .where("c.from_user", userId)
+    .andWhere("c.created_at", ">=", db.raw("NOW() - INTERVAL 24 HOUR"))
+
     .select(
       "c.id as connectionId",
       "c.status",
       "c.created_at",
-      "p.raasi",
-      "p.gender",
-      "p.income",
-      "p.occupation",
-      "p.city"
+
+      "p.user_id as receiver_id",
+      "p.full_name as receiver_name",
+      "p.income as receiver_salary",
+      "p.occupation as receiver_work",
+      "p.city as receiver_city",
+      "p.country as receiver_country",
+      "p.raasi as receiver_raasi"
     );
 
   return rows;
@@ -443,43 +365,70 @@ module.exports.getSentConnections = async (userId) => {
 /// update profile
 
 module.exports.updateUserProfile = async (props = {}) => {
-
-
-  const { userid, ...updateData } = props;
-  console.log("Incoming Props:", props);
+  const { userid, ...data } = props;
 
   if (!userid) {
     return {
       success: false,
       message: "userid is required",
     };
-    
   }
-      
 
-
-    // ✅ REMOVE unwanted fields
-  delete updateData.id;
-  delete updateData.user_id;
-  delete updateData.created_at;
-
-  // ✅ FIX DOB FORMAT
-  if (updateData.dob) {
-    updateData.dob = updateData.dob.split("T")[0];
-  }
-console.log("Final Update Data:", updateData);
-console.log("User ID:", userid);
-   
   try {
-   
+    // ✅ Only allow these fields to update
+    const allowedFields = [
+      "full_name",
+      "gender",
+      "dob",
+      "birth_time",
+      "marital_status",
+      "education",
+      "occupation",
+      "income",
+      "email",
+      "father_name",
+      "mother_name",
+      "grandfather_name",
+      "grandmother_name",
+      "siblings",
+      "raasi",
+      "star",
+      "dosham",
+      "birth_place",
+      "horoscope_uploaded",
+      "horoscope_file_name",
+      "horoscope_file_url",
+      "religion",
+      "caste",
+      "address",
+      "city",
+      "country",
+      "privacy",
+      "photo",
+      "is_public",
+    ];
 
-    const updated = await db("profiles").where({ user_id: userid }).update(updateData);
-console.log("test update",updateData)
+    const updateData = {};
+
+    allowedFields.forEach((field) => {
+      if (data[field] !== undefined) {
+        updateData[field] = data[field];
+      }
+    });
+
+    // ✅ Fix DOB format
+    if (updateData.dob) {
+      updateData.dob = updateData.dob.split("T")[0];
+    }
+
+    const updated = await db("profiles")
+      .where({ user_id: userid })
+      .update(updateData);
 
     if (!updated) {
       return {
         success: false,
-        message: "User not found",
+        message: "Profile not found",
       };
     }
 
@@ -488,7 +437,6 @@ console.log("test update",updateData)
       message: "Profile updated successfully",
     };
   } catch (error) {
-      console.log("DB ERROR:", error.message);
     return {
       success: false,
       message: error.message,
@@ -516,12 +464,9 @@ module.exports.uploadProfilePhoto = async ({ userId, file }) => {
   }
 };
 
-
 module.exports.getUserProfileService = async (user_id) => {
   try {
-    const profile = await db("profiles")
-      .where({user_id })
-      .first();     
+    const profile = await db("profiles").where({ user_id }).first();
 
     if (!profile) {
       return {
@@ -539,6 +484,29 @@ module.exports.getUserProfileService = async (user_id) => {
     return {
       success: false,
       message: err.message,
+    };
+  }
+};
+
+// uploadHoroscope
+module.exports.uploadHoroscope = async ({ userId, file }) => {
+  try {
+    await db("profiles").where({ user_id: userId }).update({
+      horoscope_file_name: file.originalname,
+      horoscope_file_url: file.filename,
+      horoscope_uploaded: 1,
+    });
+
+    return {
+      success: true,
+      message: "Horoscope uploaded successfully",
+      fileName: file.originalname,
+      fileUrl: file.filename,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
     };
   }
 };

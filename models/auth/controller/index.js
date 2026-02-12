@@ -28,7 +28,7 @@ module.exports.login = async (req, res) => {
     const response = await service.login(req.body);
     
 
-    console.log("JWT SECRET (LOGIN):", process.env.JWT_SECRET);
+    // console.log("JWT SECRET (LOGIN):", process.env.JWT_SECRET);
 
 
     return res.status(response.code).json({

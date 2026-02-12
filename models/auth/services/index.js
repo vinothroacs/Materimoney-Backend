@@ -3,19 +3,30 @@ const jwt = require("jsonwebtoken");
 const db = require("../../../config/db");
 
 module.exports.login = async (props) => {
-  const { email, password } = props;
+  const { email, phone, password } = props;
 
   try {
-    const user = await db("users")
-      .where({ email })
-      .orWhere("phone", email)
-      .first();
+    let query = db("users");
+
+    if (email) {
+      query = query.where("email", email);
+    } else if (phone) {
+      query = query.where("phone", phone);
+    } else {
+      return {
+        code: 400,
+        status: false,
+        message: "Email or phone is required",
+      };
+    }
+
+    const user = await query.first();
 
     if (!user) {
       return {
         code: 400,
         status: false,
-        message: "Invalid email or password",
+        message: "Invalid credentials",
       };
     }
 
@@ -24,7 +35,7 @@ module.exports.login = async (props) => {
       return {
         code: 400,
         status: false,
-        message: "Invalid email or password",
+        message: "Invalid credentials",
       };
     }
 
@@ -32,12 +43,13 @@ module.exports.login = async (props) => {
       {
         userid: user.id,
         name: user.name,
+        phone: user.phone,
         email: user.email,
         roleid: user.roleid,
         status: user.status,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "12h" },
+      { expiresIn: "12h" }
     );
 
     return {
@@ -48,9 +60,10 @@ module.exports.login = async (props) => {
       roleid: user.roleid,
       status: user.status,
       user: {
-        id: user.id, // ✅ IMPORTANT
+        id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
       },
     };
   } catch (error) {
@@ -63,6 +76,7 @@ module.exports.login = async (props) => {
     };
   }
 };
+
 
 module.exports.register = async (props) => {
   const { name, email, password, phone } = props;

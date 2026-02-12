@@ -1,11 +1,13 @@
 const db = require("../../../config/db");
 const { sendMail } = require("../../../utils/mailer");
-const { acceptTemplate ,rejectTemplate} = require("../../../utils/emailTemplates");
+const {
+  acceptTemplate,
+  rejectTemplate,
+} = require("../../../utils/emailTemplates");
 
 module.exports.getPendingForms = async () => {
   try {
-    const pendingForms = await db("users")
-      .where({ status: "PENDING" });
+    const pendingForms = await db("users").where({ status: "PENDING" });
 
     if (!pendingForms || pendingForms.length === 0) {
       return {
@@ -17,7 +19,7 @@ module.exports.getPendingForms = async () => {
     return {
       success: true,
       message: "Pending forms fetched successfully",
-      data:  pendingForms || [],
+      data: pendingForms || [],
     };
   } catch (error) {
     return {
@@ -29,15 +31,12 @@ module.exports.getPendingForms = async () => {
 
 // REJECT USER + NOTIFICATION
 
-
 module.exports.rejectUser = async (userId) => {
   try {
     // 🔴 ONLY status update using ID
-    const updated = await db("users")
-      .where({ id: userId })
-      .update({
-        status: "REJECTED",
-      });
+    const updated = await db("users").where({ id: userId }).update({
+      status: "REJECTED",
+    });
 
     if (!updated) {
       return {
@@ -60,42 +59,6 @@ module.exports.rejectUser = async (userId) => {
     return { success: false, error: error.message };
   }
 };
-
-
-module.exports.acceptUser = async (userId) => {
-  try {
-    // ✅ Update status to ACTIVE
-    const updated = await db("users")
-      .where({ id: userId })
-      .update({
-        status: "ACTIVE",
-      });
-
-    if (!updated) {
-      return {
-        success: false,
-        message: "User not found",
-      };
-    }
-
-    // 🔔 Notification for user
-    await db("notifications").insert({
-      user_id: userId,
-      type: "ADMIN_ACCEPT",
-      message: "Your profile has been approved by admin",
-      is_read: 0,
-      created_at: new Date(),
-    });
-
-    return { success: true };
-  } catch (error) {
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-};
-
 
 // 🔹 COMMON MAPPER (snake_case → camelCase)
 const mapProfile = (p) => ({
@@ -142,13 +105,13 @@ const mapProfile = (p) => ({
 
   status: p.status,
   createdAt: p.created_at,
-  is_active:Number(p.is_active)
+  is_active: Number(p.is_active),
 });
 
 // 🔹 GET ALL USERS
 module.exports.getAllUsers = async () => {
   try {
-   const rows = await db("profiles").select("*");
+    const rows = await db("profiles").select("*");
     return {
       success: true,
       data: rows.map(mapProfile),
@@ -173,51 +136,6 @@ module.exports.getPendingUsers = async () => {
     return { success: false, error: err.message };
   }
 };
-
-// <<<<<<< HEAD
-// ✅ ADMIN APPROVE
-// module.exports.adminApproveUser = async (id) => {
-//   try {
-//     const updated = await db("profiles")
-//       .where({ id })
-//       .update({ status: 1 });
-// =======
-// // ✅ ADMIN APPROVE
-// module.exports.adminApproveUser = async (id) => {
-//   try {
-//     const updated = await db("profiles")
-//       .where({ id })
-//       .update({ status: "ACTIVE" });
-// >>>>>>> 314ef470a86f7e8ebfc20a33d203675cbed1ba02
-
-//     if (!updated) {
-//       return { success: false, message: "Profile not found" };
-//     }
-
-//     return { success: true };
-//   } catch (err) {
-//     return { success: false, error: err.message };
-//   }
-// };
-
-// // ❌ ADMIN REJECT
-// module.exports.adminRejectUser = async (id) => {
-//   try {
-//     const updated = await db("profiles")
-//       .where({ id })
-//       .update({ status: "REJECTED" });
-
-//     if (!updated) {
-//       return { success: false, message: "Profile not found" };
-//     }
-
-//     return { success: true };
-//   } catch (err) {
-//     return { success: false, error: err.message };
-//   }
-// };
-
-// service
 
 module.exports.adminApproveUser = async (profileId) => {
   try {
@@ -246,7 +164,7 @@ module.exports.adminApproveUser = async (profileId) => {
 
 module.exports.adminRejectUser = async (profileId, reason) => {
   try {
-     console.log("SERVICE profileId 👉", profileId);
+    console.log("SERVICE profileId 👉", profileId);
     console.log("SERVICE reason 👉", reason);
     const profile = await db("profiles").where({ id: profileId }).first();
     console.log("PROFILE 👉", profile);
@@ -256,7 +174,9 @@ module.exports.adminRejectUser = async (profileId, reason) => {
     console.log("USER 👉", user);
     if (!user) return { success: false, message: "User not found" };
 
-    await db("profiles").where({ id: profileId }).update({ status: "REJECTED" });
+    await db("profiles")
+      .where({ id: profileId })
+      .update({ status: "REJECTED" });
     await db("users").where({ id: user.id }).update({ status: "REJECTED" });
 
     // 📧 reject mail
@@ -268,17 +188,11 @@ module.exports.adminRejectUser = async (profileId, reason) => {
 
     return { success: true };
   } catch (err) {
-     console.error("SERVICE ERROR 👉", err);
+    console.error("SERVICE ERROR 👉", err);
     console.error("Reject error:", err);
     return { success: false, message: "Reject failed" };
   }
 };
-
-
-
-
-
-
 
 // 👁 TOGGLE VISIBILITY
 // services/admin.service.js
@@ -293,9 +207,7 @@ module.exports.adminToggleVisibility = async (props = {}) => {
   }
 
   try {
-    const profile = await db("profiles")
-      .where({ id })
-      .first();
+    const profile = await db("profiles").where({ id }).first();
 
     if (!profile) {
       return {
@@ -306,9 +218,7 @@ module.exports.adminToggleVisibility = async (props = {}) => {
 
     const newValue = key ? 1 : 0;
 
-    await db("profiles")
-      .where({ id })
-      .update({ is_active: newValue });
+    await db("profiles").where({ id }).update({ is_active: newValue });
 
     return {
       success: true,
@@ -322,15 +232,11 @@ module.exports.adminToggleVisibility = async (props = {}) => {
   }
 };
 
-
-
-
 // ================= DASHBOARD STATS =================
 module.exports.getAdminDashboardStats = async () => {
   try {
     // Total profiles
-    const [{ totalUsers }] = await db("profiles")
-      .count("id as totalUsers");
+    const [{ totalUsers }] = await db("profiles").count("id as totalUsers");
 
     // Active profiles (status = ACTIVE)
     const [{ activeUsers }] = await db("profiles")

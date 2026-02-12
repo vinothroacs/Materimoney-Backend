@@ -35,18 +35,33 @@ router.get(
 // 📤 Get Sent Connections0000
 router.get("/connections/sent", authMiddleware, controller.getSentConnections);
 
-// Accept Connection
+//acoect connection
 router.post(
   "/connections/:id/accept",
   authMiddleware,
-  controller.acceptConnection,
+  controller.acceptConnection
 );
+
+
+//acoect connection get
+router.get(
+  "/connections/accepted",
+  authMiddleware,
+  controller.getAcceptedConnections
+);
+
 
 // ❌ Reject Connection
 router.post(
   "/connections/:id/reject",
   authMiddleware,
   controller.rejectConnection,
+);
+
+router.delete(
+  "/connections/:connectionId/withdraw",
+  authMiddleware,
+  controller.withdrawConnection,
 );
 
 
@@ -74,6 +89,25 @@ router.put(
 );
 
 
+
+
+///horoscope
+const safeUploadHoroscope =
+  typeof controller.uploadHoroscope === "function"
+    ? controller.uploadHoroscope
+    : (req, res) =>
+        res.status(501).json({
+          success: false,
+          message: "Horoscope upload not implemented",
+        });
+
+// Upload Horoscope
+router.put(
+  "/profile/horoscope",
+  authMiddleware,
+  upload.single("horoscope"),
+  safeUploadHoroscope
+);
 
 
 module.exports = router;

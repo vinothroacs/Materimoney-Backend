@@ -5,7 +5,6 @@ module.exports.submitProfile = async (req, res) => {
   console.log("USER FROM TOKEN 👉", req.user);
 
   // const userId = req.user.id;
- 
 
   try {
     const response = await service.submitProfile(req.body, req.files, req.user);
@@ -16,16 +15,12 @@ module.exports.submitProfile = async (req, res) => {
       });
     }
 
-    return res.status(201).json(
-  {
-      
+    return res.status(201).json({
       success: true,
       message: response.message,
       data: response.data,
     });
-    
   } catch (err) {
-  
     return res.status(500).json({
       success: false,
       message: err.message,
@@ -50,34 +45,6 @@ module.exports.getVisibleConnections = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
-// module.exports.getUserProfile = async (req, res) => {
-
-//   const userId = req.params.id;
-
-//   try {
-//     const response = await service.getUserProfileService(userId);
-
-//    if(!response){
-//     return {
-//       success : false,
-//       message : response.message
-//     }
-//    }
-
-//     return res.status(200).json({
-//       success: true,
-//       data: response.data,
-//     });
-//   } catch (err) {
-
-//     console.log(err)
-//     return res.status(500).json({
-//       success: false,
-//       message: err.message,
-//     });
-//   }
-// };
 
 module.exports.sendConnectionRequest = async (req, res) => {
   try {
@@ -161,20 +128,11 @@ module.exports.getSentConnections = async (req, res) => {
 
 //// GET ACEPET CONNECCTIONS
 
+// ACCEPT CONNECTION (update DB)
 module.exports.acceptConnection = async (req, res) => {
   try {
     const connectionId = parseInt(req.params.id);
-    console.log("test connection", connectionId);
     const userId = req.user.id;
-    console.log("ID:", req.params.id);
-    console.log("USER:", req.user.id);
-
-    if (!connectionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid connection id",
-      });
-    }
 
     const result = await service.acceptConnection(connectionId, userId);
 
@@ -183,13 +141,35 @@ module.exports.acceptConnection = async (req, res) => {
     }
 
     return res.status(200).json(result);
+
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message
     });
   }
 };
+
+
+// GET ACCEPTED CONNECTIONS (24 hrs valid)
+module.exports.getAcceptedConnections = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const data = await service.getAcceptedConnections(userId);
+
+    return res.status(200).json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 
 ///REJECT CONNECTIONS
 
@@ -219,8 +199,8 @@ module.exports.rejectConnection = async (req, res) => {
  */
 module.exports.withdrawConnection = async (req, res) => {
   try {
-    const connectionId = req.params.id;
-    const userId = req.user.id; // from_user
+    const connectionId = req.params.connectionId;
+    const userId = req.user.id;
 
     const result = await service.withdrawConnection(connectionId, userId);
 
@@ -228,37 +208,26 @@ module.exports.withdrawConnection = async (req, res) => {
       return res.status(400).json(result);
     }
 
-    return res.json({
-      success: true,
-      message: "Connection withdrawn successfully",
-    });
+    return res.status(200).json(result);
+
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
+
 ////  Update Profile
 module.exports.updateUserProfile = async (req, res) => {
-console.log("Incoming body:", req.body);
-
-
   try {
-    const userid = req.user.id; // 🔥 from token
-   
-console.log("TOKEN USER ID:", req.user.id);
-
-
     const response = await service.updateUserProfile({
-      userid,
+      userid: req.user.id,
       ...req.body,
-      
     });
-    console.log("test response", response)
 
-    return res.status(200).json({
-      success: true,
-      message: response.message,
-    });
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -320,6 +289,33 @@ module.exports.getUserProfile = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: err.message,
+    });
+  }
+};
+
+// horosccope
+module.exports.uploadHoroscope = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        message: "Horoscope file is required",
+      });
+    }
+
+    const response = await service.uploadHoroscope({
+      userId,
+      file,
+    });
+
+    return res.status(200).json(response);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

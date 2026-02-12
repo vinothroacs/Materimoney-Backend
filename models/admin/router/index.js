@@ -6,12 +6,6 @@ const { adminToggleVisibility } = require("../services/index");
 // Pending forms
 router.get("/forms/pending", controller.getPendingForms);
 
-// Reject user
-router.put("/reject/:id", controller.rejectUser);
-
-// Accept user
-router.put("/approve/:id", controller.acceptUser);
-
 // 🟢 Get all users (AllUsers table)
 router.get("/users", controller.getAllUsers);
 
@@ -25,9 +19,7 @@ router.put("/users/:id/approve", controller.adminApproveUser);
 router.put("/users/:id/reject", controller.adminRejectUser);
 
 // 👁 Toggle public / private
-router.put('/users/visibility', controller.adminToggleVisibility);
-
-
+router.put("/users/visibility", controller.adminToggleVisibility);
 
 // 🔹 DASHBOARD STATS
 router.get("/dashboard", controller.getAdminDashboard);

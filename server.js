@@ -10,8 +10,7 @@ const path = require("path");
 
 const app = express();
 
-app.use("/uploads", express.static(path.join(__dirname, "")));       
-
+app.use('/uploads', express.static('uploads'));
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -36,7 +35,9 @@ app.use("/api",routes)
 
 
 
-
+app.get("/",(req,res)=>{
+  res.send("Server is running")
+})
 
 
 
