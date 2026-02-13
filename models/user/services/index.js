@@ -279,15 +279,18 @@ module.exports.getReceivedConnections = async (userId) => {
     .join("profiles as p", "p.user_id", "c.from_user")
     .where("c.to_user", userId)
     .where("c.status", "Sent")
-    .select(
-      "c.id as connectionId",
-      "c.created_at",
-      "p.raasi",
-      "p.gender",
-      "p.income",
-      "p.occupation",
-      "p.city",
-    );
+   .select(
+  "c.id as connectionId",
+  "c.from_user",
+  "c.created_at",
+  "p.full_name",
+  "p.raasi",
+  "p.gender",
+  "p.income",
+  "p.occupation",
+  "p.city",
+);
+
 
   return rows;
 };

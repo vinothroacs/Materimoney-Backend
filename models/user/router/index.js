@@ -116,6 +116,14 @@ router.post(
   controller.sendConnectionRequest
 );
 
+// GET SENT CONNECTIONS
+router.get(
+  "/connections/sent",
+  authMiddleware,
+  controller.getSentConnections
+);
+
+
 
 
 module.exports = router;
