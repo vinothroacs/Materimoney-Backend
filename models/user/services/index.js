@@ -111,9 +111,7 @@ module.exports.submitProfile = async (payload, files, user) => {
 //visble connections
 module.exports.getVisibleConnections = async (userId) => {
   try {
-    const myProfile = await db("profiles")
-      .where({ user_id: userId })
-      .first();
+    const myProfile = await db("profiles").where({ user_id: userId }).first();
 
     if (!myProfile) {
       return {
@@ -142,7 +140,6 @@ module.exports.getVisibleConnections = async (userId) => {
     };
   }
 };
-
 
 module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
   try {
@@ -232,8 +229,6 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
     };
   }
 };
-
-
 
 // /**
 //  * WITHDRAW (SENDER ONLY)
@@ -409,14 +404,11 @@ module.exports.updateUserProfile = async (props = {}) => {
   const { userid, ...data } = props;
 
   if (!userid) {
-    return {
-      success: false,
-      message: "userid is required",
-    };
+    return { success: false, message: "userid is required" };
   }
 
   try {
-    // ✅ Only allow these fields to update
+    // ✅ ONLY DB COLUMN NAMES
     const allowedFields = [
       "full_name",
       "gender",
@@ -439,8 +431,6 @@ module.exports.updateUserProfile = async (props = {}) => {
       "horoscope_uploaded",
       "horoscope_file_name",
       "horoscope_file_url",
-      "religion",
-      "caste",
       "address",
       "city",
       "country",
@@ -467,10 +457,7 @@ module.exports.updateUserProfile = async (props = {}) => {
       .update(updateData);
 
     if (!updated) {
-      return {
-        success: false,
-        message: "Profile not found",
-      };
+      return { success: false, message: "Profile not found" };
     }
 
     return {
@@ -478,6 +465,16 @@ module.exports.updateUserProfile = async (props = {}) => {
       message: "Profile updated successfully",
     };
   } catch (error) {
+    // // ✅ DUPLICATE EMAIL HANDLING
+    // if (error.code === "ER_DUP_ENTRY") {
+    //   if (error.message.includes("profiles.email")) {
+    //     return {
+    //       success: false,
+    //       message: "This email is already in use",
+    //     };
+    //   }
+    // }
+
     return {
       success: false,
       message: error.message,
@@ -488,9 +485,9 @@ module.exports.updateUserProfile = async (props = {}) => {
 ///uploadProfilePhoto
 module.exports.uploadProfilePhoto = async ({ userId, file }) => {
   try {
-    await db("profiles").where({ user_id: userId }).update({
-      photo: file.filename, // ✅ ONLY THIS
-    });
+    await db("profiles")
+      .where({ user_id: userId })
+      .update({ photo: file.filename });
 
     return {
       success: true,

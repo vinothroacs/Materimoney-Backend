@@ -72,7 +72,7 @@ router.put(
   "/profile/photo",
   authMiddleware,
   upload.single("photo"),
-  safeUploadProfilePhoto,
+  controller.updatePhoto   // ✅ REQUIRED
 );
 
 ///horoscope

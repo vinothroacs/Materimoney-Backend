@@ -218,7 +218,7 @@ module.exports.withdrawConnection = async (req, res) => {
   }
 };
 
-////  Update Profile
+// ////  Update Profile
 module.exports.updateUserProfile = async (req, res) => {
   try {
     const response = await service.updateUserProfile({
@@ -226,58 +226,25 @@ module.exports.updateUserProfile = async (req, res) => {
       ...req.body,
     });
 
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
     return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: err.message,
+      message: "Internal server error",
     });
   }
 };
+
 
 /**
  * UPDATE PROFILE (TEXT DATA)
  */
 
-exports.updateProfile = async (req, res) => {
-  try {
-    console.log("REQ.USER 👉", req.user);
 
-    const userId = req.user.id;
-    const body = req.body;
-
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "User id missing",
-      });
-    }
-
-    if (!body || Object.keys(body).length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Request body is empty",
-      });
-    }
-
-    const result = await service.updateProfile(userId, body);
-
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
-    return res.json({
-      success: true,
-      message: "Profile updated successfully",
-    });
-  } catch (err) {
-    console.error("UPDATE PROFILE ERROR 👉", err);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
 
 /**
  * UPDATE PHOTO
@@ -291,23 +258,25 @@ exports.updatePhoto = async (req, res) => {
       });
     }
 
-    const result = await service.updatePhoto(req.user.id, req.file);
+    const result = await service.uploadProfilePhoto({
+      userId: req.user.id,
+      file: req.file,
+    });
 
     if (!result.success) {
       return res.status(400).json(result);
     }
 
-    res.json({
-      success: true,
-      message: "Photo updated successfully",
-    });
-  } catch (err) {
-    res.status(500).json({
+    return res.json(result);
+
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: err.message,
+      message: "Internal server error",
     });
   }
 };
+
 
 // horosccope
 module.exports.uploadHoroscope = async (req, res) => {
@@ -330,11 +299,15 @@ module.exports.uploadHoroscope = async (req, res) => {
     return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
+      
       success: false,
-      message: error.message,
+     
+      
     });
+    
   }
-};
+};      
+
 
 /// get user profile
 
