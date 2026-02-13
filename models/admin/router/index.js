@@ -12,6 +12,10 @@ router.get("/users", controller.getAllUsers);
 // 🟡 Get pending users
 router.get("/users/pending", controller.getPendingUsers);
 
+// 🔍 Get single user profile
+router.get("/users/:id", controller.getSingleUser);
+
+
 // ✅ Approve user (ADMIN)
 router.put("/users/:id/approve", controller.adminApproveUser);
 

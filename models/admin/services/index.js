@@ -309,3 +309,27 @@ module.exports.getAdminDashboardStats = async () => {
     };
   }
 };
+
+
+// 🔹 GET SINGLE USER PROFILE
+module.exports.getSingleUser = async (userId) => {
+  try {
+    const id = Number(userId);
+
+    const profile = await db("profiles")
+      .where({ user_id: id })
+      .first();
+
+    if (!profile) {
+      return { success: false, message: "Profile not found" };
+    }
+
+    return {
+      success: true,
+      data: mapProfile(profile),
+    };
+
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+};
