@@ -13,10 +13,8 @@ const app = express();
 app.use('/uploads', express.static('uploads'));
 
 app.use(cors({
-  origin: "https://new-matrimony-frontend.netlify.app/",
-  credentials: true,
+ 
 }));
-app.options("*", cors());
 
 app.use(express.json());
 app.use(cookieParser());
