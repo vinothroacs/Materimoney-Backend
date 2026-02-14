@@ -13,7 +13,10 @@ const app = express();
 app.use('/uploads', express.static('uploads'));
 
 app.use(cors({
- 
+  origin: ["https://new-matrimony-frontend.netlify.app"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 }));
 
 app.use(express.json());
@@ -39,4 +42,6 @@ app.get("/",(req,res)=>{
 
 
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+/* IMPORTANT FOR RENDER */
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
